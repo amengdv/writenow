@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+    id String @db.Uuid @id
+    createdAt DateTime @map("created_at")
+    updatedAt DateTime @map("updated_at")
+    email String @unique
+    username String
+    password String
+
+    auth Auth[]
+
+    @@map("users")
+}
+
+model Auth {
+    id String @db.Uuid @id
+    createdAt DateTime @map("created_at")
+    refreshToken String? @db.VarChar(64) @unique @map("refresh_token")
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @db.Uuid @map("user_id")
+
+    @@map("auth")
+}
