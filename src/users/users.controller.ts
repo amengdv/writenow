@@ -26,7 +26,7 @@ export class UsersController {
                 updatedAt: this.time.nowISO(new Date()),
                 email: createUserDto.email,
                 username: createUserDto.username,
-                password: await this.auth.encrypt(createUserDto.password),
+                password: await this.auth.hashPassword(createUserDto.password),
             });
             return user;
         } catch(err) {
