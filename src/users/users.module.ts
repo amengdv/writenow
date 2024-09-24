@@ -13,5 +13,6 @@ import { AuthModule } from 'src/auth/auth.module';
         PrismaService,
         TimeService,
     ],
+    exports: [UsersService]
 })
 export class UsersModule {}

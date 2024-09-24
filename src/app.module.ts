@@ -7,9 +7,10 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { TimeService } from './time/time.service';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UsersModule, AuthModule],
+  imports: [UsersModule, AuthModule, ConfigModule.forRoot()],
   controllers: [AppController, UsersController],
   providers: [AppService, PrismaService, UsersService, TimeService],
 })

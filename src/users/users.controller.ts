@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -19,25 +19,15 @@ export class UsersController {
     @Post()
     async create(@Body() createUserDto: CreateUserDto): Promise<User> {
         const id: string = uuidv4();
-        try {
-            const user: User = await this.user.createUser({
-                id: id,
-                createdAt: this.time.nowISO(new Date()),
-                updatedAt: this.time.nowISO(new Date()),
-                email: createUserDto.email,
-                username: createUserDto.username,
-                password: await this.auth.hashPassword(createUserDto.password),
-            });
-            return user;
-        } catch(err) {
-            throw new HttpException(
-                'Error Creating User',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                {
-                    cause: err,
-                }
-            );
-        }
+        const user: User = await this.user.createUser({
+            id: id,
+            createdAt: this.time.nowISO(new Date()),
+            updatedAt: this.time.nowISO(new Date()),
+            email: createUserDto.email,
+            username: createUserDto.username,
+            password: await this.auth.hashPassword(createUserDto.password),
+        });
+        return user;
     }
 
 

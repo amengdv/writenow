@@ -9,4 +9,10 @@ export class AuthHelper {
         const hash = await bcrypt.hash(plainText, salt);
         return hash;
     }
+
+    async comparePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+        const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
+        return isMatch;
+    }
+
 }
