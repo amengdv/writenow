@@ -1,14 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { TimeService } from 'src/time/time.service';
 import { AuthHelper } from 'src/auth/auth.helper';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController {
-
 
     constructor(
         private user: UsersService,
@@ -30,5 +30,15 @@ export class UsersController {
         return user;
     }
 
+    @UseGuards(AuthGuard)
+    @Get(':id')
+    findOneById(@Param('id') id: any, @Request() req: any) {
+        if (req.user.sub != id) {
+            throw new UnauthorizedException();
+        }
 
+        return this.user.user({
+            id: id,
+        });
+    }
 }
