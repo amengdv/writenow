@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -17,7 +17,7 @@ export class UsersController {
     ) {};
 
     @Post()
-    async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    async create(@Body() createUserDto: CreateUserDto) {
         const id: string = uuidv4();
         const user: User = await this.user.createUser({
             id: id,
@@ -27,18 +27,65 @@ export class UsersController {
             username: createUserDto.username,
             password: await this.auth.hashPassword(createUserDto.password),
         });
-        return user;
+
+        return {
+            id: user.id,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+            email: user.email,
+            username: user.username
+        }
     }
 
     @UseGuards(AuthGuard)
     @Get(':id')
-    findOneById(@Param('id') id: any, @Request() req: any) {
+    async findOneById(@Param('id') id: any, @Request() req: any) {
         if (req.user.sub != id) {
             throw new UnauthorizedException();
         }
 
-        return this.user.user({
+        const user = await this.user.user({
             id: id,
         });
+
+        return {
+            id: user.id,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+            email: user.email,
+            username: user.username,
+        }
+    }
+
+    @UseGuards(AuthGuard)
+    @Put(':id')
+    async updateUserById(
+        @Param('id') id: any,
+        @Body() updateUserDto: CreateUserDto,
+        @Request() req: any,
+    ) {
+        if (req.user.sub != id) {
+            throw new UnauthorizedException();
+        }
+
+        const userUpdated = await this.user.updateUser({
+            where: {
+                id: id,
+            },
+            data: {
+                email: updateUserDto.email,
+                updatedAt: this.time.nowISO(new Date()),
+                username: updateUserDto.username,
+                password: await this.auth.hashPassword(updateUserDto.password),
+            }
+        });
+
+        return {
+            id: userUpdated.id,
+            created_at: userUpdated.createdAt,
+            updated_at: userUpdated.updatedAt,
+            email: userUpdated.email,
+            username: userUpdated.username,
+        }
     }
 }
