@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -87,5 +87,23 @@ export class UsersController {
             email: userUpdated.email,
             username: userUpdated.username,
         }
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete(':id')
+    @HttpCode(204)
+    async deleteUserById(
+        @Param('id') id: any,
+        @Request() req: any,
+    ) {
+        if (req.user.sub != id) {
+            throw new UnauthorizedException();
+        }
+
+        await this.user.deleteUser(
+            {
+                id: id
+            },
+        )
     }
 }
